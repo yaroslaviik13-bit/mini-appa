@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Помощник | Mini App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка с профилем -->
+        <header class="header">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="user-info">
+                    <h1 id="user-name">AI Помощник</h1>
+                    <div class="stats">
+                        <span class="stat-item" id="token-count">
+                            <i class="fas fa-gem"></i> <span id="tokens">0</span>
+                        </span>
+                        <span class="stat-item" id="message-count">
+                            <i class="fas fa-comment"></i> <span id="messages">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <button class="refresh-btn" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </header>
+
+        <!-- Основные функции -->
+        <section class="functions-section">
+            <h2><i class="fas fa-bolt"></i> Быстрые действия</h2>
+            <div class="functions-grid">
+                <div class="function-card" onclick="openFunction('ask')">
+                    <div class="function-icon question">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Задать вопрос</h3>
+                    <p>Получите ответ от AI</p>
+                    <div class="price">1 токен</div>
+                </div>
+
+                <div class="function-card" onclick="openFunction('photo')">
+                    <div class="function-icon photo">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h3>Решить по фото</h3>
+                    <p>Анализ изображений</p>
+                    <div class="price">3 токена</div>
+                </div>
+
+                <div class="function-card" onclick="openFunction('translate')">
+                    <div class="function-icon translate">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3>Переводчик</h3>
+                    <p>Перевод текстов</p>
+                    <div class="price">1 токен</div>
+                </div>
+
+                <div class="function-card" onclick="openFunction('story')">
+                    <div class="function-icon story">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3>Создать историю</h3>
+                    <p>Генерация текстов</p>
+                    <div class="price">5 токенов</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Бонусы и промокоды -->
+        <section class="bonus-section">
+            <h2><i class="fas fa-gift"></i> Бонусы и награды</h2>
+            <div class="bonus-grid">
+                <div class="bonus-card" onclick="claimBonus()">
+                    <div class="bonus-icon daily">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="bonus-info">
+                        <h3>Ежедневный бонус</h3>
+                        <p>Получите токены каждый день</p>
+                    </div>
+                    <div class="bonus-action">
+                        <button class="claim-btn" id="daily-btn">Забрать</button>
+                    </div>
+                </div>
+
+                <div class="bonus-card" onclick="openReferral()">
+                    <div class="bonus-icon referral">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="bonus-info">
+                        <h3>Реферальная система</h3>
+                        <p>50 токенов за друга</p>
+                    </div>
+                    <div class="bonus-action">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="bonus-card" onclick="openPromo()">
+                    <div class="bonus-icon promo">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="bonus-info">
+                        <h3>Промокоды</h3>
+                        <p>Активируйте коды</p>
+                    </div>
+                    <div class="bonus-action">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- История операций -->
+        <section class="history-section">
+            <h2><i class="fas fa-history"></i> Последние действия</h2>
+            <div class="history-list" id="history-list">
+                <!-- История будет загружена через JS -->
+            </div>
+        </section>
+
+        <!-- Нижнее меню -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="showSection('main')">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </button>
+            <button class="nav-btn" onclick="showSection('profile')">
+                <i class="fas fa-user"></i>
+                <span>Профиль</span>
+            </button>
+            <button class="nav-btn" onclick="showSection('help')">
+                <i class="fas fa-question-circle"></i>
+                <span>Помощь</span>
+            </button>
+            <button class="nav-btn" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>Настройки</span>
+            </button>
+        </nav>
+
+        <!-- Модальные окна -->
+        <div class="modal-overlay" id="modal-overlay"></div>
+
+        <div class="modal" id="question-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Задать вопрос</h3>
+                <button class="close-modal" onclick="closeModal('question-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="question-input" placeholder="Введите ваш вопрос..."></textarea>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('question-modal')">Отмена</button>
+                    <button class="btn-primary" onclick="sendQuestion()">Отправить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="referral-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Реферальная система</h3>
+                <button class="close-modal" onclick="closeModal('referral-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="referral-stats">
+                    <div class="stat-box">
+                        <h4>Приглашено</h4>
+                        <p class="stat-value" id="referral-count">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Заработано</h4>
+                        <p class="stat-value" id="earned-tokens">0</p>
+                    </div>
+                </div>
+                <div class="referral-link">
+                    <h4>Ваша ссылка:</h4>
+                    <div class="link-container">
+                        <input type="text" id="ref-link" readonly>
+                        <button class="copy-btn" onclick="copyReferralLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn-primary full-width" onclick="shareReferral()">
+                    <i class="fas fa-share"></i> Поделиться
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
